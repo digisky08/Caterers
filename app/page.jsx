@@ -1,6 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { useEffect } from "react";
 import Link from "next/link";
 import Hero from "@/components/Hero";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
@@ -35,10 +36,10 @@ export default function Home() {
   ];
 
   const stats = [
-    { number: "500+", label: "Events Catered" },
-    { number: "15+", label: "Years Experience" },
-    { number: "100%", label: "Client Satisfaction" },
-    { number: "50+", label: "Expert Team Members" },
+    { number: 500, suffix: "+", label: "Events Catered" },
+    { number: 15, suffix: "+", label: "Years Experience" },
+    { number: 100, suffix: "%", label: "Client Satisfaction" },
+    { number: 50, suffix: "+", label: "Expert Team Members" },
   ];
 
   const menuHighlights = [
@@ -67,9 +68,62 @@ export default function Home() {
     },
   ];
 
+  const FeatureCard = ({ index, feature }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6, delay: index * 0.08 }}
+      className="group relative p-8 rounded-xl border border-gray-100 bg-gradient-to-br from-white to-gray-50 shadow-sm hover:shadow-2xl transition-all duration-300"
+      style={{ transformStyle: "preserve-3d" }}
+      whileHover={{ rotateX: 6, rotateY: -6 }}
+    >
+      <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#D4AF37]/0 via-[#D4AF37]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+      <div className="text-[#800020] mb-4 flex justify-center">
+        {feature.icon}
+      </div>
+      <h3 className="text-2xl font-bold text-gray-900 mb-3">{feature.title}</h3>
+      <p className="text-gray-600">{feature.description}</p>
+    </motion.div>
+  );
+
+  const StatNumber = ({ value, suffix = "" }) => {
+    const motionValue = useMotionValue(0);
+    const rounded = useTransform(motionValue, (latest) => Math.round(latest));
+
+    useEffect(() => {
+      const controls = animate(motionValue, value, {
+        duration: 1.2,
+        ease: "easeOut",
+      });
+      return controls.stop;
+    }, [value, motionValue]);
+
+    return (
+      <span>
+        <motion.span>{rounded}</motion.span>
+        {suffix}
+      </span>
+    );
+  };
+
   return (
     <div className="overflow-hidden">
       <Hero />
+
+      {/* Curved divider */}
+      <div aria-hidden className="bg-white">
+        <svg
+          className="-mt-24 w-full"
+          viewBox="0 0 1440 90"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="#ffffff"
+            d="M0,64L48,53.3C96,43,192,21,288,21.3C384,21,480,43,576,53.3C672,64,768,64,864,53.3C960,43,1056,21,1152,26.7C1248,32,1344,64,1392,80L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"
+          />
+        </svg>
+      </div>
 
       {/* Features Section */}
       <section id="about" className="py-20 bg-white">
@@ -95,22 +149,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="text-center p-8 bg-gradient-to-br from-gray-50 to-white rounded-lg hover:shadow-xl transition-all border border-gray-100"
-              >
-                <div className="text-[#800020] mb-4 flex justify-center">
-                  {feature.icon}
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </motion.div>
+              <FeatureCard key={index} index={index} feature={feature} />
             ))}
           </div>
         </div>
@@ -123,14 +162,14 @@ export default function Home() {
             {stats.map((stat, index) => (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, scale: 0.5 }}
+                initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
                 className="text-center"
               >
                 <div className="text-5xl md:text-6xl font-bold text-[#D4AF37] mb-2">
-                  {stat.number}
+                  <StatNumber value={stat.number} suffix={stat.suffix} />
                 </div>
                 <div className="text-xl text-gray-200">{stat.label}</div>
               </motion.div>
@@ -169,9 +208,10 @@ export default function Home() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="group relative h-96 rounded-lg overflow-hidden"
+                className="group relative h-96 rounded-lg overflow-hidden [perspective:1000px]"
+                whileHover={{ rotateX: 4, rotateY: -4 }}
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10" />
                 <div
                   className="absolute inset-0 bg-cover bg-center transform group-hover:scale-110 transition-transform duration-500"
                   style={{
@@ -179,7 +219,7 @@ export default function Home() {
                       ? `url(${item.image})`
                       : "linear-gradient(135deg, #800020 0%, #600015 100%)",
                   }}
-                ></div>
+                />
                 <div className="absolute inset-0 z-20 flex flex-col justify-end p-8 text-white">
                   <h3 className="text-3xl font-bold mb-2">{item.name}</h3>
                   <p className="text-lg text-gray-200">{item.description}</p>
